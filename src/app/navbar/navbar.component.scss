@@ -1,0 +1,20 @@
+.nav-bar {
+  background-image: linear-gradient(to right top, #000000, #110f10, #1a1a1b, #232325, #2b2d30);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+h1 {
+  margin: 0 auto;
+  color: #fff;
+
+}
+
+a {
+  background: red;
+  color: #fff;
+  border-radius: 4px;
+  padding: 5px 10px;
+}

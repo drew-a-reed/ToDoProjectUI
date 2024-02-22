@@ -9,6 +9,16 @@ import { SignupComponent } from './components/signup/signup.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { TokenInterceptor } from './interceptors/token.interceptor';
 import { ResetComponent } from './components/reset/reset.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCommonModule } from '@angular/material/core';
+import { MatButtonModule } from '@angular/material/button';
+import {DragDropModule} from '@angular/cdk/drag-drop';
+import { NavbarComponent } from './navbar/navbar.component';
 
 
 @NgModule({
@@ -17,14 +27,24 @@ import { ResetComponent } from './components/reset/reset.component';
     LoginComponent,
     SignupComponent,
     DashboardComponent,
-    ResetComponent
+    ResetComponent,
+    NavbarComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,
     HttpClientModule,
-    FormsModule
+    FormsModule,
+    BrowserAnimationsModule,
+    MatToolbarModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    MatCommonModule,
+    MatButtonModule,
+    DragDropModule
   ],
   providers: [{
     provide: HTTP_INTERCEPTORS,
