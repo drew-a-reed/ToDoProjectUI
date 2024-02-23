@@ -73,7 +73,7 @@ export class LoginComponent implements OnInit {
           const tokenPayload = this.auth.decodeToken();
           this.userStore.setFullNameForStore(tokenPayload.unique_name);
           this.userStore.setRoleForStore(tokenPayload.role);
-          this.router.navigate(['dashboard']);
+          this.router.navigate(['noteboard']);
         },
         error: (response) => {
           alert('Email/password do not match.');
