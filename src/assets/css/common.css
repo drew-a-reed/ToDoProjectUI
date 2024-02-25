@@ -1,8 +1,3 @@
-.outer {
-  height: 100vh;
-  background-image: linear-gradient(to right top, #000000, #110f10, #1a1a1b, #232325, #2b2d30);
-}
-
 .panel-heading {
   text-align: center;
   margin-bottom: 10px;
@@ -85,6 +80,6 @@ img {
   position: absolute;
   top: -13px;
   left: 33%;
-  background-color: #dcf7fa;
+  background-color: antiquewhite;
   padding: 0 8px;
 }

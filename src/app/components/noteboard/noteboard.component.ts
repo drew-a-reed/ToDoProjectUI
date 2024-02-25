@@ -47,8 +47,12 @@ export class NoteBoardComponent implements OnInit {
       this.inProgress = this.tasks.filter(
         (task) => task.status.toLowerCase() === 'in progress'
       );
-      this.done = this.tasks.filter((task) => task.status.toLowerCase() === 'done');
-      this.tasks = this.tasks.filter((task) => task.status.toLowerCase() === 'to do');
+      this.done = this.tasks.filter(
+        (task) => task.status.toLowerCase() === 'done'
+      );
+      this.tasks = this.tasks.filter(
+        (task) => task.status.toLowerCase() === 'to do'
+      );
     });
 
     this.userStore.getFullNameFromStore().subscribe((val) => {
@@ -64,12 +68,20 @@ export class NoteBoardComponent implements OnInit {
 
   addTask() {
     const newTask: Task = {
-      id: '',
       status: 'To Do',
       description: this.todoForm.value.task,
       done: false,
     };
-    this.tasks.push(newTask);
+    this.api.addTask(newTask).subscribe({
+      next: (task) => {
+        this.api.getAllTasks().subscribe((response) => {
+          this.tasks = response;
+          this.tasks = this.tasks.filter(
+            (task) => task.status.toLowerCase() === 'to do'
+          );
+        });
+      },
+    });
     this.todoForm.reset();
   }
 
@@ -80,45 +92,84 @@ export class NoteBoardComponent implements OnInit {
   }
 
   updateTask() {
-    this.tasks[this.updateIndex].description = this.todoForm.value.task;
-    this.tasks[this.updateIndex].done = false;
-    this.todoForm.reset();
-    this.updateIndex = undefined;
-    this.isEditEnabled = false;
+    const updatedTask = this.tasks[this.updateIndex];
+    updatedTask.description = this.todoForm.value.task;
+    this.api.updateTask(updatedTask).subscribe({
+      next: (response) => {
+        console.log(response);
+        this.tasks[this.updateIndex] = updatedTask;
+        this.todoForm.reset();
+        this.updateIndex = undefined;
+        this.isEditEnabled = false;
+      },
+      error: (error) => {
+        console.error(error);
+      }
+    });
   }
+
 
   deleteTask(task: Task, i: number) {
-    this.api.deleteTask(task.id).subscribe(
-      () => {
-        this.tasks.splice(i, 1);
-      },
-      (error) => {
-        console.error('Error deleting task:', error);
-      }
-    );
+    if (task.id) {
+      this.api.deleteTask(task.id).subscribe(
+        () => {
+          this.tasks.splice(i, 1);
+        },
+        (error) => {
+          console.error('Error deleting task:', error);
+        }
+      );
+    } else {
+      console.error('Task ID is undefined');
+    }
   }
 
-
-  deleteTaskInProgress(i: number) {
-    this.inProgress.splice(i, 1);
+  deleteTaskInProgress(task: Task, i: number) {
+    if (task.id) {
+      this.api.deleteTask(task.id).subscribe(
+        () => {
+          this.inProgress.splice(i, 1);
+        },
+        (error) => {
+          console.error('Error deleting task in progress:', error);
+        }
+      );
+    } else {
+      console.error('Task ID is undefined');
+    }
   }
 
-  deleteTaskDone(i: number) {
-    this.done.splice(i, 1);
+  deleteTaskDone(task: Task, i: number) {
+    if (task.id) {
+      this.api.deleteTask(task.id).subscribe(
+        () => {
+          this.done.splice(i, 1);
+        },
+        (error) => {
+          console.error('Error deleting task done:', error);
+        }
+      );
+    } else {
+      console.error('Task ID is undefined');
+    }
   }
 
   drop(event: CdkDragDrop<Task[]>, category: string) {
     let targetArray: Task[];
+    let status: string;
 
     switch (category) {
       case 'tasks':
         targetArray = this.tasks;
+        status = 'To Do';
         break;
       case 'inProgress':
         targetArray = this.inProgress;
+        status = 'In Progress';
         break;
       case 'done':
         targetArray = this.done;
+        status = 'Done';
         break;
       default:
         return;
@@ -131,12 +182,26 @@ export class NoteBoardComponent implements OnInit {
         event.currentIndex
       );
     } else {
+      const movedTask = event.previousContainer.data[event.previousIndex];
+      movedTask.status = status;
+
       transferArrayItem(
         event.previousContainer.data,
         targetArray,
         event.previousIndex,
         event.currentIndex
       );
+
+      this.api.updateTask(movedTask).subscribe({
+        next: (response) => {
+          console.log(response);
+        },
+        error: (error) => {
+          console.error(error);
+        }
+      });
     }
   }
+
+
 }
