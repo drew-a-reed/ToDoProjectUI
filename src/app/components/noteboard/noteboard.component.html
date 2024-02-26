@@ -7,54 +7,61 @@
           <mat-label>Task Name</mat-label>
           <input formControlName="task" matInput placeholder="Placeholder">
           <mat-icon matSuffix>sentiment_very_satisfied</mat-icon>
-          <mat-hint>Add Task Name</mat-hint>
         </mat-form-field>
-        <button *ngIf="!isEditEnabled" (click)="addTask()" mat-raised-button [disabled]="todoForm.invalid"
-          color="primary">Add</button>
-        <button *ngIf="isEditEnabled" (click)="updateTask()" mat-raised-button [disabled]="todoForm.invalid"
-          color="primary">Update</button>
+        <mat-form-field appearance="outline">
+          <mat-label>Users</mat-label>
+          <mat-select [formControl]="userList" multiple>
+            <mat-option *ngFor="let user of users" [value]="user">
+              {{ user.firstName }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button *ngIf="!isEditEnabled" (click)="addTask()" mat-raised-button [disabled]="todoForm.invalid" color="primary">Add</button>
+        <button *ngIf="isEditEnabled" (click)="updateTask()" mat-raised-button [disabled]="todoForm.invalid" color="primary">Update</button>
       </form>
+
     </mat-card>
   </div>
   <div cdkDropListGroup class="outer__task--list">
     <div class="outer__task--list-status">
-    <div class="container">
-      <h2>To do <span *ngIf="tasks.length > 0"> - {{ tasks.length }}</span></h2>
-      <div cdkDropList [cdkDropListData]="tasks" class="list" (cdkDropListDropped)="drop($event, 'tasks')">
-        <div class="box" *ngFor="let task of tasks; let i = index" cdkDrag>{{ task.description }}
-          <div class="box">
-            <button mat-icon-button color="warn" (click)="deleteTask(task, i)"><mat-icon>delete</mat-icon></button>
-            <button mat-icon-button color="primary" (click)="editTask(task, i)"><mat-icon>edit</mat-icon></button>
+      <div class="container">
+        <h2>To do <span *ngIf="tasks.length > 0"> - {{ tasks.length }}</span></h2>
+        <div cdkDropList [cdkDropListData]="tasks" class="list" (cdkDropListDropped)="drop($event, 'tasks')">
+          <div class="box" *ngFor="let task of tasks;" cdkDrag>{{ task.description }}
+            <div class="box">
+              <button mat-icon-button color="warn" (click)="deleteTask(task)"><mat-icon>delete</mat-icon></button>
+              <button mat-icon-button color="primary" (click)="editTask(task)"><mat-icon>edit</mat-icon></button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
     </div>
     <div class="outer__task--list-status">
-    <div class="container">
-      <h2>In Progress <span *ngIf="inProgress.length > 0"> - {{ inProgress.length }}</span></h2>
-      <div cdkDropList [cdkDropListData]="inProgress" class="list" (cdkDropListDropped)="drop($event, 'inProgress')">
-        <div class="box" *ngFor="let task of inProgress; let i = index" cdkDrag>{{ task.description }}
-          <div class="box">
-            <button mat-icon-button color="warn" (click)="deleteTaskInProgress(task, i)"><mat-icon>delete</mat-icon></button>
-            <!-- <button mat-icon-button color="primary" (click)="editTask(task, i)"><mat-icon>edit</mat-icon></button> -->
+      <div class="container">
+        <h2>In Progress <span *ngIf="inProgress.length > 0"> - {{ inProgress.length }}</span></h2>
+        <div cdkDropList [cdkDropListData]="inProgress" class="list" (cdkDropListDropped)="drop($event, 'inProgress')">
+          <div class="box" *ngFor="let task of inProgress;" cdkDrag>{{ task.description }}
+            <div class="box">
+              <button mat-icon-button color="warn"
+                (click)="deleteTaskInProgress(task)"><mat-icon>delete</mat-icon></button>
+              <!-- <button mat-icon-button color="primary" (click)="editTask(task, i)"><mat-icon>edit</mat-icon></button> -->
+            </div>
           </div>
         </div>
       </div>
-    </div>
     </div>
     <div class="outer__task--list-status">
-    <div class="container">
-      <h2>Done <span *ngIf="done.length > 0"> - {{ done.length }}</span></h2>
-      <div cdkDropList [cdkDropListData]="done" class="list" (cdkDropListDropped)="drop($event, 'done')">
-        <div class="box" *ngFor="let task of done; let i = index" cdkDrag>{{ task.description }}
-          <div class="box">
-            <button mat-icon-button color="warn" (click)="deleteTaskDone(task, i)"><mat-icon>delete</mat-icon></button>
-            <button mat-icon-button color="primary"><mat-icon>check_circle</mat-icon></button>
+      <div class="container">
+        <h2>Done <span *ngIf="done.length > 0"> - {{ done.length }}</span></h2>
+        <div cdkDropList [cdkDropListData]="done" class="list" (cdkDropListDropped)="drop($event, 'done')">
+          <div class="box" *ngFor="let task of done;" cdkDrag>{{ task.description }}
+            <div class="box">
+              <button mat-icon-button color="warn" (click)="deleteTaskDone(task)"><mat-icon>delete</mat-icon></button>
+              <button mat-icon-button color="primary"><mat-icon>check_circle</mat-icon></button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
   </div>
 </div>

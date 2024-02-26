@@ -4,8 +4,15 @@ import {
   transferArrayItem,
 } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { Task } from 'src/app/models/task.model';
+import {
+  FormGroup,
+  FormBuilder,
+  Validators,
+  FormControl,
+} from '@angular/forms';
+import { Observable, map, startWith } from 'rxjs';
+import { ITask } from 'src/app/models/task';
+import { IUser } from 'src/app/models/user';
 import { ApiService } from 'src/app/services/api.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { UserStoreService } from 'src/app/services/user-store.service';
@@ -17,14 +24,17 @@ import { UserStoreService } from 'src/app/services/user-store.service';
 })
 export class NoteBoardComponent implements OnInit {
   todoForm!: FormGroup;
-  tasks: Task[] = [];
-  inProgress: Task[] = [];
-  done: Task[] = [];
-  updateIndex!: any;
+  task!: ITask;
+  tasks: ITask[] = [];
+  taskId?: string;
+  inProgress: ITask[] = [];
+  done: ITask[] = [];
   isEditEnabled: boolean = false;
-  public users: any = [];
-  public role!: string;
-  public fullName: string = '';
+  users: IUser[] = [];
+  role!: string;
+  fullName: string = '';
+  userList = new FormControl<IUser[]>([]);
+  user: IUser | undefined;
 
   constructor(
     private fb: FormBuilder,
@@ -38,22 +48,11 @@ export class NoteBoardComponent implements OnInit {
       task: ['', Validators.required],
     });
 
-    this.api.getAllUsers().subscribe((res) => {
-      this.users = res;
+    this.api.getAllUsers().subscribe((response) => {
+      this.users = response;
     });
 
-    this.api.getAllTasks().subscribe((response) => {
-      this.tasks = response;
-      this.inProgress = this.tasks.filter(
-        (task) => task.status.toLowerCase() === 'in progress'
-      );
-      this.done = this.tasks.filter(
-        (task) => task.status.toLowerCase() === 'done'
-      );
-      this.tasks = this.tasks.filter(
-        (task) => task.status.toLowerCase() === 'to do'
-      );
-    });
+    this.getAllTasks();
 
     this.userStore.getFullNameFromStore().subscribe((val) => {
       const fullNameFromToken = this.auth.getFullNameFromToken();
@@ -66,54 +65,96 @@ export class NoteBoardComponent implements OnInit {
     });
   }
 
+  getAllTasks() {
+    this.api.getAllTasks().subscribe((response) => {
+      this.tasks = response;
+      this.inProgress = this.tasks.filter(
+        (task) => task.status.toLowerCase() === 'in progress'
+      );
+      this.done = this.tasks.filter(
+        (task) => task.status.toLowerCase() === 'done'
+      );
+      this.tasks = this.tasks.filter(
+        (task) => task.status.toLowerCase() === 'to do'
+      );
+    });
+  }
+
   addTask() {
-    const newTask: Task = {
+    const newTask: ITask = {
       status: 'To Do',
       description: this.todoForm.value.task,
       done: false,
     };
+
     this.api.addTask(newTask).subscribe({
-      next: (task) => {
-        this.api.getAllTasks().subscribe((response) => {
-          this.tasks = response;
-          this.tasks = this.tasks.filter(
-            (task) => task.status.toLowerCase() === 'to do'
-          );
-        });
+      next: (response) => {
+        const taskId = response['taskId'];
+        this.addUserTask(taskId);
+
+        this.getAllTasks();
       },
     });
+
     this.todoForm.reset();
   }
 
-  editTask(task: Task, i: number) {
-    this.todoForm.controls['task'].setValue(task.description);
-    this.updateIndex = i;
-    this.isEditEnabled = true;
+  addUserTask(taskId: string) {
+    const selectedUsers = this.userList.value;
+
+    if (selectedUsers && selectedUsers.length > 0) {
+      const selectedUserIds = selectedUsers.map((user) => user.id);
+
+      this.api.addUserTasks(selectedUserIds, taskId).subscribe({
+        next: (response) => {
+          console.log('User tasks added:', response);
+        },
+        error: (error) => {
+          console.error('Error adding user tasks:', error);
+        },
+      });
+    }
+    this.userList.reset();
+  }
+
+  editTask(task: ITask) {
+    if (task && task.id) {
+      this.taskId = task.id;
+      this.todoForm.controls['task'].setValue(task.description);
+      this.isEditEnabled = true;
+
+    } else {
+      console.error('Task ID is undefined');
+    }
   }
 
   updateTask() {
-    const updatedTask = this.tasks[this.updateIndex];
-    updatedTask.description = this.todoForm.value.task;
+    const updatedTask: ITask = {
+      id: this.taskId,
+      status: 'To Do',
+      description: this.todoForm.value.task,
+      done: false,
+    };
+
     this.api.updateTask(updatedTask).subscribe({
       next: (response) => {
-        console.log(response);
-        this.tasks[this.updateIndex] = updatedTask;
+        const taskId = response['taskId'];
+        this.addUserTask(taskId);
         this.todoForm.reset();
-        this.updateIndex = undefined;
         this.isEditEnabled = false;
+        this.getAllTasks();
       },
       error: (error) => {
         console.error(error);
-      }
+      },
     });
   }
 
-
-  deleteTask(task: Task, i: number) {
+  deleteTask(task: ITask) {
     if (task.id) {
       this.api.deleteTask(task.id).subscribe(
         () => {
-          this.tasks.splice(i, 1);
+          this.tasks = this.tasks.filter((t) => t.id !== task.id);
         },
         (error) => {
           console.error('Error deleting task:', error);
@@ -124,11 +165,11 @@ export class NoteBoardComponent implements OnInit {
     }
   }
 
-  deleteTaskInProgress(task: Task, i: number) {
+  deleteTaskInProgress(task: ITask) {
     if (task.id) {
       this.api.deleteTask(task.id).subscribe(
         () => {
-          this.inProgress.splice(i, 1);
+          this.inProgress = this.inProgress.filter((t) => t.id !== task.id);
         },
         (error) => {
           console.error('Error deleting task in progress:', error);
@@ -139,11 +180,11 @@ export class NoteBoardComponent implements OnInit {
     }
   }
 
-  deleteTaskDone(task: Task, i: number) {
+  deleteTaskDone(task: ITask) {
     if (task.id) {
       this.api.deleteTask(task.id).subscribe(
         () => {
-          this.done.splice(i, 1);
+          this.done = this.done.filter((t) => t.id !== task.id);
         },
         (error) => {
           console.error('Error deleting task done:', error);
@@ -154,8 +195,8 @@ export class NoteBoardComponent implements OnInit {
     }
   }
 
-  drop(event: CdkDragDrop<Task[]>, category: string) {
-    let targetArray: Task[];
+  drop(event: CdkDragDrop<ITask[]>, category: string) {
+    let targetArray: ITask[];
     let status: string;
 
     switch (category) {
@@ -198,10 +239,8 @@ export class NoteBoardComponent implements OnInit {
         },
         error: (error) => {
           console.error(error);
-        }
+        },
       });
     }
   }
-
-
 }

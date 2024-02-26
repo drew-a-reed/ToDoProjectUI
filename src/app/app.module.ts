@@ -16,9 +16,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCommonModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
-import {DragDropModule} from '@angular/cdk/drag-drop';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NoteBoardComponent } from './components/noteboard/noteboard.component';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatSelectModule } from '@angular/material/select';
 
 @NgModule({
   declarations: [
@@ -27,7 +29,7 @@ import { NoteBoardComponent } from './components/noteboard/noteboard.component';
     SignupComponent,
     ResetComponent,
     NavbarComponent,
-    NoteBoardComponent
+    NoteBoardComponent,
   ],
   imports: [
     BrowserModule,
@@ -43,13 +45,17 @@ import { NoteBoardComponent } from './components/noteboard/noteboard.component';
     MatIconModule,
     MatCommonModule,
     MatButtonModule,
-    DragDropModule
+    DragDropModule,
+    MatAutocompleteModule,
+    MatSelectModule,
   ],
-  providers: [{
-    provide: HTTP_INTERCEPTORS,
-    useClass: TokenInterceptor,
-    multi: true
-  }],
-  bootstrap: [AppComponent]
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: TokenInterceptor,
+      multi: true,
+    },
+  ],
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
