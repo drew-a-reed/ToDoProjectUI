@@ -16,8 +16,10 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
-        <button *ngIf="!isEditEnabled" (click)="addTask()" mat-raised-button [disabled]="todoForm.invalid" color="primary">Add</button>
-        <button *ngIf="isEditEnabled" (click)="updateTask()" mat-raised-button [disabled]="todoForm.invalid" color="primary">Update</button>
+        <button *ngIf="!isEditEnabled" (click)="addTask()" mat-raised-button [disabled]="todoForm.invalid"
+          color="primary">Add</button>
+        <button *ngIf="isEditEnabled" (click)="updateTask()" mat-raised-button [disabled]="todoForm.invalid"
+          color="primary">Update</button>
       </form>
 
     </mat-card>
@@ -27,12 +29,20 @@
       <div class="container">
         <h2>To do <span *ngIf="tasks.length > 0"> - {{ tasks.length }}</span></h2>
         <div cdkDropList [cdkDropListData]="tasks" class="list" (cdkDropListDropped)="drop($event, 'tasks')">
-          <div class="box" *ngFor="let task of tasks;" cdkDrag>{{ task.description }}
+          <div class="box" *ngFor="let task of tasks;" cdkDrag>
+            {{ task.description }}
+            <p>Assigned Users:</p>
+            <ul *ngIf="task.id && taskUserMap[task.id]">
+              <li *ngFor="let user of taskUserMap[task.id]">
+                {{ user.firstName }}
+              </li>
+            </ul>
             <div class="box">
               <button mat-icon-button color="warn" (click)="deleteTask(task)"><mat-icon>delete</mat-icon></button>
               <button mat-icon-button color="primary" (click)="editTask(task)"><mat-icon>edit</mat-icon></button>
             </div>
           </div>
+
         </div>
       </div>
     </div>
@@ -41,10 +51,15 @@
         <h2>In Progress <span *ngIf="inProgress.length > 0"> - {{ inProgress.length }}</span></h2>
         <div cdkDropList [cdkDropListData]="inProgress" class="list" (cdkDropListDropped)="drop($event, 'inProgress')">
           <div class="box" *ngFor="let task of inProgress;" cdkDrag>{{ task.description }}
+            <p>Assigned Users:</p>
+            <ul *ngIf="task.id && taskUserMap[task.id]">
+              <li *ngFor="let user of taskUserMap[task.id]">
+                {{ user.firstName }}
+              </li>
+            </ul>
             <div class="box">
               <button mat-icon-button color="warn"
                 (click)="deleteTaskInProgress(task)"><mat-icon>delete</mat-icon></button>
-              <!-- <button mat-icon-button color="primary" (click)="editTask(task, i)"><mat-icon>edit</mat-icon></button> -->
             </div>
           </div>
         </div>
@@ -55,6 +70,12 @@
         <h2>Done <span *ngIf="done.length > 0"> - {{ done.length }}</span></h2>
         <div cdkDropList [cdkDropListData]="done" class="list" (cdkDropListDropped)="drop($event, 'done')">
           <div class="box" *ngFor="let task of done;" cdkDrag>{{ task.description }}
+            <p>Assigned Users:</p>
+            <ul *ngIf="task.id && taskUserMap[task.id]">
+              <li *ngFor="let user of taskUserMap[task.id]">
+                {{ user.firstName }}
+              </li>
+            </ul>
             <div class="box">
               <button mat-icon-button color="warn" (click)="deleteTaskDone(task)"><mat-icon>delete</mat-icon></button>
               <button mat-icon-button color="primary"><mat-icon>check_circle</mat-icon></button>

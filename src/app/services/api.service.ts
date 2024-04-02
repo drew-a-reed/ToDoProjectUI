@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ITask } from '../models/task';
 import { IUser } from '../models/user';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -13,6 +14,10 @@ export class ApiService {
 
   getAllUsers() {
     return this.http.get<any>(`${this.baseUrl}User/users`);
+  }
+
+  getUserById(userId: string): Observable<IUser> {
+    return this.http.get<IUser>(`${this.baseUrl}User/${userId}`);
   }
 
   getAllTasks() {
@@ -42,4 +47,11 @@ export class ApiService {
     return this.http.get<IUser[]>(`${this.baseUrl}UserTask/users/${taskId}/tasks`);
   }
 
+  deleteUserFromTask(taskId: string): Observable<any> {
+    return this.http.delete<any>(`${this.baseUrl}UserTask/tasks/${taskId}`);
+  }
+
+  deleteUsersFromTask(taskId: string): Observable<any> {
+    return this.http.delete<any>(`${this.baseUrl}UserTask/tasks/${taskId}`);
+  }
 }

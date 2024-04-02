@@ -117,7 +117,6 @@ export class LoginComponent implements OnInit {
   handleLogin(response: any) {
     if (response) {
       const payload = this.decodeToken(response.credential);
-      console.log(payload);
 
       var email = payload.email;
       var password = payload.aud + '@S';

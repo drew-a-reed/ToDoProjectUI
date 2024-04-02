@@ -30,11 +30,14 @@ export class NoteBoardComponent implements OnInit {
   inProgress: ITask[] = [];
   done: ITask[] = [];
   isEditEnabled: boolean = false;
+
   users: IUser[] = [];
   role!: string;
   fullName: string = '';
   userList = new FormControl<IUser[]>([]);
   user: IUser | undefined;
+  usersAssignedToTask:  IUser[] = [];
+  taskUserMap: { [taskId: string]: IUser[] } = {};
 
   constructor(
     private fb: FormBuilder,
@@ -77,8 +80,21 @@ export class NoteBoardComponent implements OnInit {
       this.tasks = this.tasks.filter(
         (task) => task.status.toLowerCase() === 'to do'
       );
+
+      [...this.tasks, ...this.inProgress, ...this.done].forEach((task) => {
+        if (task.id !== undefined) {
+          this.api.getAssignedUsersForTask(task.id).subscribe((users) => {
+            if (task.id !== undefined) {
+              this.taskUserMap[task.id] = users;
+              console.log("Task ID:", task.id);
+              console.log("Users:", this.taskUserMap[task.id]);
+            }
+          });
+        }
+      });
     });
   }
+
 
   addTask() {
     const newTask: ITask = {
@@ -91,7 +107,6 @@ export class NoteBoardComponent implements OnInit {
       next: (response) => {
         const taskId = response['taskId'];
         this.addUserTask(taskId);
-
         this.getAllTasks();
       },
     });
@@ -105,12 +120,20 @@ export class NoteBoardComponent implements OnInit {
     if (selectedUsers && selectedUsers.length > 0) {
       const selectedUserIds = selectedUsers.map((user) => user.id);
 
-      this.api.addUserTasks(selectedUserIds, taskId).subscribe({
-        next: (response) => {
-          console.log('User tasks added:', response);
+      this.api.deleteUsersFromTask(taskId).subscribe({
+        next: () => {
+          this.api.addUserTasks(selectedUserIds, taskId).subscribe({
+            next: (response) => {
+              this.getAllTasks();
+              console.log('User tasks added:', response);
+            },
+            error: (error) => {
+              console.error('Error adding user tasks:', error);
+            },
+          });
         },
         error: (error) => {
-          console.error('Error adding user tasks:', error);
+          console.error('Error deleting existing user tasks:', error);
         },
       });
     }
@@ -122,7 +145,11 @@ export class NoteBoardComponent implements OnInit {
       this.taskId = task.id;
       this.todoForm.controls['task'].setValue(task.description);
       this.isEditEnabled = true;
-
+      this.api.getAssignedUsersForTask(task.id).subscribe((users) => {
+        this.usersAssignedToTask = users;
+        const selectedUsers = users.map(user => this.users.find(u => u.id === user.id)!);
+        this.userList.setValue(selectedUsers);
+      });
     } else {
       console.error('Task ID is undefined');
     }
@@ -236,6 +263,7 @@ export class NoteBoardComponent implements OnInit {
       this.api.updateTask(movedTask).subscribe({
         next: (response) => {
           console.log(response);
+          this.getAllTasks();
         },
         error: (error) => {
           console.error(error);
