@@ -21,6 +21,9 @@ import { NavbarComponent } from './components/navbar/navbar.component';
 import { NoteBoardComponent } from './components/noteboard/noteboard.component';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+
 
 @NgModule({
   declarations: [
@@ -48,6 +51,8 @@ import { MatSelectModule } from '@angular/material/select';
     DragDropModule,
     MatAutocompleteModule,
     MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   providers: [
     {
@@ -55,6 +60,8 @@ import { MatSelectModule } from '@angular/material/select';
       useClass: TokenInterceptor,
       multi: true,
     },
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   bootstrap: [AppComponent],
 })

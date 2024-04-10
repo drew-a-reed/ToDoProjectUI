@@ -5,7 +5,7 @@
       <form [formGroup]="todoForm" class="m-3">
         <mat-form-field appearance="outline">
           <mat-label>Task Name</mat-label>
-          <input formControlName="task" matInput placeholder="Placeholder">
+          <input formControlName="task" matInput>
           <mat-icon matSuffix>sentiment_very_satisfied</mat-icon>
         </mat-form-field>
         <mat-form-field appearance="outline">
@@ -16,12 +16,21 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Due Date</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="date">
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Task Description</mat-label>
+          <textarea matInput placeholder="" formControlName="description"></textarea>
+        </mat-form-field>
         <button *ngIf="!isEditEnabled" (click)="addTask()" mat-raised-button [disabled]="todoForm.invalid"
           color="primary">Add</button>
         <button *ngIf="isEditEnabled" (click)="updateTask()" mat-raised-button [disabled]="todoForm.invalid"
           color="primary">Update</button>
       </form>
-
     </mat-card>
   </div>
   <div cdkDropListGroup class="tasks--board">
@@ -29,13 +38,13 @@
       <h2>To do <span *ngIf="tasks.length > 0"> - {{ tasks.length }}</span></h2>
       <div cdkDropList [cdkDropListData]="tasks" class="tasks--board-category-list to-do"
         (cdkDropListDropped)="drop($event, 'tasks')">
-        <div class="tasks--board-category-list-task" *ngFor="let task of tasks;" cdkDrag>
-          <div class="tasks--board-category-list-task-title">
-            {{ task.description }}
+        <div class="tasks--board-category-list-task to-do-task" *ngFor="let task of tasks;" cdkDrag>
+          <div class="tasks--board-category-list-task-title" style="background-color: #026ADD;" style="background-color: #026ADD;">
+            {{ task.title }}
           </div>
           <div class="tasks--board-category-list-task-details">
             <div class="tasks--board-category-list-task-users">
-              <p>Users:</p>
+              <p style="font-weight: 500;">Users:</p>
               <ul *ngIf="task.id && taskUserMap[task.id]" style="padding:0;">
                 <li *ngFor="let user of taskUserMap[task.id]">
                   {{ user.firstName }}
@@ -43,10 +52,13 @@
               </ul>
             </div>
             <div class="tasks--board-category-list-task-date">
-              <p>Date:</p>
+              <p style="font-weight: 500;">Assign Date:</p>
               <p>{{task.assignedDate | date }}</p>
+              <p style="font-weight: 500;">Due Date:</p>
+              <p>{{task.dueDate | date }}</p>
             </div>
           </div>
+          <div class="tasks--board-category-list-task-description">{{ task.description }}</div>
           <div class="tasks--board-category-list-task-edit">
             <button mat-icon-button color="warn" (click)="deleteTask(task)"><mat-icon>delete</mat-icon></button>
             <button mat-icon-button color="primary" (click)="editTask(task)"><mat-icon>edit</mat-icon></button>
@@ -58,13 +70,13 @@
       <h2>In Progress <span *ngIf="inProgress.length > 0"> - {{ inProgress.length }}</span></h2>
       <div cdkDropList [cdkDropListData]="inProgress" class="tasks--board-category-list in-progress"
         (cdkDropListDropped)="drop($event, 'inProgress')">
-        <div class="tasks--board-category-list-task" *ngFor="let task of inProgress;" cdkDrag>
-          <div class="tasks--board-category-list-task-title">
-            {{ task.description }}
+        <div class="tasks--board-category-list-task in-progress-task" *ngFor="let task of inProgress;" cdkDrag>
+          <div class="tasks--board-category-list-task-title" style="background-color: #DE3232;">
+            {{ task.title }}
           </div>
           <div class="tasks--board-category-list-task-details">
             <div class="tasks--board-category-list-task-users">
-              <p>Users:</p>
+              <p style="font-weight: 500;">Users:</p>
               <ul *ngIf="task.id && taskUserMap[task.id]" style="padding:0;">
                 <li *ngFor="let user of taskUserMap[task.id]">
                   {{ user.firstName }}
@@ -72,10 +84,13 @@
               </ul>
             </div>
             <div class="tasks--board-category-list-task-date">
-              <p>Date:</p>
+              <p style="font-weight: 500;">Assign Date:</p>
               <p>{{task.assignedDate | date }}</p>
+              <p style="font-weight: 500;">Due Date:</p>
+              <p>{{task.dueDate | date }}</p>
             </div>
           </div>
+          <div class="tasks--board-category-list-task-description">{{ task.description }}</div>
           <div class="tasks--board-category-list-task-edit">
             <button mat-icon-button color="warn" (click)="deleteTaskInProgress(task)"><mat-icon>delete</mat-icon></button>
             <button mat-icon-button color="primary" (click)="editTask(task)"><mat-icon>edit</mat-icon></button>
@@ -87,13 +102,13 @@
       <h2>Done <span *ngIf="done.length > 0"> - {{ done.length }}</span></h2>
       <div cdkDropList [cdkDropListData]="done" class="tasks--board-category-list done"
         (cdkDropListDropped)="drop($event, 'done')">
-        <div class="tasks--board-category-list-task" *ngFor="let task of done;" cdkDrag>
-          <div class="tasks--board-category-list-task-title">
-            {{ task.description }}
+        <div class="tasks--board-category-list-task done-task" *ngFor="let task of done;" cdkDrag>
+          <div class="tasks--board-category-list-task-title"  style="background-color: #00A560;">
+            {{ task.title }}
           </div>
           <div class="tasks--board-category-list-task-details">
             <div class="tasks--board-category-list-task-users">
-              <p>Users:</p>
+              <p style="font-weight: 500;">Users:</p>
               <ul *ngIf="task.id && taskUserMap[task.id]" style="padding:0;">
                 <li *ngFor="let user of taskUserMap[task.id]">
                   {{ user.firstName }}
@@ -101,10 +116,13 @@
               </ul>
             </div>
             <div class="tasks--board-category-list-task-date">
-              <p>Date:</p>
+              <p style="font-weight: 500;">Assign Date:</p>
               <p>{{task.assignedDate | date }}</p>
+              <p style="font-weight: 500;">Due Date:</p>
+              <p>{{task.dueDate | date }}</p>
             </div>
           </div>
+          <div class="tasks--board-category-list-task-description">{{ task.description }}</div>
           <div class="tasks--board-category-list-task-edit">
             <button mat-icon-button color="warn" (click)="deleteTaskDone(task)"><mat-icon>delete</mat-icon></button>
             <button mat-icon-button color="primary"><mat-icon>check_circle</mat-icon></button>

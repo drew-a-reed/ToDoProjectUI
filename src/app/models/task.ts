@@ -1,8 +1,10 @@
 export interface ITask{
   [x: string]: any;
   id?: string,
-  description: string,
+  title?: string,
+  description?: string,
   status: string,
   done: boolean,
-  assignedDate?: any
+  assignedDate?: any,
+  dueDate?: any
 }

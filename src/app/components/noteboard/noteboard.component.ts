@@ -31,6 +31,7 @@ export class NoteBoardComponent implements OnInit {
   done: ITask[] = [];
   isEditEnabled: boolean = false;
   status?: string;
+  dueDate?: string;
   users: IUser[] = [];
   role!: string;
   fullName: string = '';
@@ -49,6 +50,8 @@ export class NoteBoardComponent implements OnInit {
   ngOnInit(): void {
     this.todoForm = this.fb.group({
       task: ['', Validators.required],
+      date: ['', Validators.required],
+      description: ['', Validators.required]
     });
 
     this.api.getAllUsers().subscribe((response) => {
@@ -71,7 +74,6 @@ export class NoteBoardComponent implements OnInit {
   getAllTasks() {
     this.api.getAllTasks().subscribe((response) => {
       this.tasks = response;
-      console.log(response);
 
       this.inProgress = this.tasks.filter(
         (task) => task.status.toLowerCase() === 'in progress'
@@ -95,12 +97,13 @@ export class NoteBoardComponent implements OnInit {
     });
   }
 
-
   addTask() {
     const newTask: ITask = {
       status: 'To Do',
-      description: this.todoForm.value.task,
+      title: this.todoForm.value.task,
       assignedDate: new Date(),
+      dueDate: this.todoForm.value.date,
+      description: this.todoForm.value.description,
       done: false,
     };
 
@@ -144,7 +147,9 @@ export class NoteBoardComponent implements OnInit {
     if (task && task.id) {
       this.status = task.status;
       this.taskId = task.id;
-      this.todoForm.controls['task'].setValue(task.description);
+      this.todoForm.controls['task'].setValue(task.title);
+      this.todoForm.controls['date'].setValue(task.dueDate);
+      this.todoForm.controls['description'].setValue(task.description);
       this.isEditEnabled = true;
 
       this.api.getAssignedUsersForTask(task.id).subscribe((users) => {
@@ -163,10 +168,11 @@ export class NoteBoardComponent implements OnInit {
     const updatedTask: ITask = {
       id: this.taskId,
       status: status,
-      description: this.todoForm.value.task,
+      title: this.todoForm.value.task,
+      dueDate: this.todoForm.value.date,
+      description: this.todoForm.value.description,
       done: false,
     };
-
 
     this.api.updateTask(updatedTask).subscribe({
       next: (response) => {
@@ -267,7 +273,6 @@ export class NoteBoardComponent implements OnInit {
 
       this.api.updateTask(movedTask).subscribe({
         next: (response) => {
-          console.log(response);
           this.getAllTasks();
         },
         error: (error) => {
