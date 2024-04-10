@@ -30,7 +30,7 @@ export class NoteBoardComponent implements OnInit {
   inProgress: ITask[] = [];
   done: ITask[] = [];
   isEditEnabled: boolean = false;
-
+  status?: string;
   users: IUser[] = [];
   role!: string;
   fullName: string = '';
@@ -71,6 +71,8 @@ export class NoteBoardComponent implements OnInit {
   getAllTasks() {
     this.api.getAllTasks().subscribe((response) => {
       this.tasks = response;
+      console.log(response);
+
       this.inProgress = this.tasks.filter(
         (task) => task.status.toLowerCase() === 'in progress'
       );
@@ -86,8 +88,6 @@ export class NoteBoardComponent implements OnInit {
           this.api.getAssignedUsersForTask(task.id).subscribe((users) => {
             if (task.id !== undefined) {
               this.taskUserMap[task.id] = users;
-              console.log("Task ID:", task.id);
-              console.log("Users:", this.taskUserMap[task.id]);
             }
           });
         }
@@ -100,6 +100,7 @@ export class NoteBoardComponent implements OnInit {
     const newTask: ITask = {
       status: 'To Do',
       description: this.todoForm.value.task,
+      assignedDate: new Date(),
       done: false,
     };
 
@@ -125,7 +126,6 @@ export class NoteBoardComponent implements OnInit {
           this.api.addUserTasks(selectedUserIds, taskId).subscribe({
             next: (response) => {
               this.getAllTasks();
-              console.log('User tasks added:', response);
             },
             error: (error) => {
               console.error('Error adding user tasks:', error);
@@ -142,9 +142,11 @@ export class NoteBoardComponent implements OnInit {
 
   editTask(task: ITask) {
     if (task && task.id) {
+      this.status = task.status;
       this.taskId = task.id;
       this.todoForm.controls['task'].setValue(task.description);
       this.isEditEnabled = true;
+
       this.api.getAssignedUsersForTask(task.id).subscribe((users) => {
         this.usersAssignedToTask = users;
         const selectedUsers = users.map(user => this.users.find(u => u.id === user.id)!);
@@ -156,12 +158,15 @@ export class NoteBoardComponent implements OnInit {
   }
 
   updateTask() {
+    const status = this.status || 'To Do';
+
     const updatedTask: ITask = {
       id: this.taskId,
-      status: 'To Do',
+      status: status,
       description: this.todoForm.value.task,
       done: false,
     };
+
 
     this.api.updateTask(updatedTask).subscribe({
       next: (response) => {
