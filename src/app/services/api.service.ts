@@ -47,10 +47,6 @@ export class ApiService {
     return this.http.get<IUser[]>(`${this.baseUrl}UserTask/users/${taskId}/tasks`);
   }
 
-  deleteUserFromTask(taskId: string): Observable<any> {
-    return this.http.delete<any>(`${this.baseUrl}UserTask/tasks/${taskId}`);
-  }
-
   deleteUsersFromTask(taskId: string): Observable<any> {
     return this.http.delete<any>(`${this.baseUrl}UserTask/tasks/${taskId}`);
   }
