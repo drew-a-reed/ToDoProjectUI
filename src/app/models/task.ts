@@ -1,9 +1,10 @@
 export interface ITask{
   [x: string]: any;
-  id?: string,
+  taskId?: string,
   title?: string,
   description?: string,
   status: string,
+  priority: string,
   done: boolean,
   assignedDate?: any,
   dueDate?: any

@@ -39,6 +39,8 @@ export class NoteBoardComponent implements OnInit {
   user: IUser | undefined;
   usersAssignedToTask:  IUser[] = [];
   taskUserMap: { [taskId: string]: IUser[] } = {};
+  priorities: string[] = ['Low', 'Medium', 'High', 'Stuck'];
+  priorityList = new FormControl<ITask[]>([]);
 
   constructor(
     private fb: FormBuilder,
@@ -51,7 +53,8 @@ export class NoteBoardComponent implements OnInit {
     this.todoForm = this.fb.group({
       task: ['', Validators.required],
       date: ['', Validators.required],
-      description: ['', Validators.required]
+      description: ['', Validators.required],
+      priority: ['', Validators.required]
     });
 
     this.api.getAllUsers().subscribe((response) => {
@@ -86,10 +89,10 @@ export class NoteBoardComponent implements OnInit {
       );
 
       [...this.tasks, ...this.inProgress, ...this.done].forEach((task) => {
-        if (task.id !== undefined) {
-          this.api.getAssignedUsersForTask(task.id).subscribe((users) => {
-            if (task.id !== undefined) {
-              this.taskUserMap[task.id] = users;
+        if (task['taskId'] !== undefined) {
+          this.api.getAssignedUsersForTask(task['taskId']).subscribe((users) => {
+            if (task['taskId'] !== undefined) {
+              this.taskUserMap[task['taskId']] = users;
             }
           });
         }
@@ -98,19 +101,28 @@ export class NoteBoardComponent implements OnInit {
   }
 
   addTask() {
+
     const newTask: ITask = {
       status: 'To Do',
       title: this.todoForm.value.task,
       assignedDate: new Date(),
       dueDate: this.todoForm.value.date,
       description: this.todoForm.value.description,
+      priority: this.todoForm.value.priority,
       done: false,
     };
 
+    console.log(newTask);
+
     this.api.addTask(newTask).subscribe({
+
       next: (response) => {
         const taskId = response['taskId'];
-        this.addUserTask(taskId);
+        if (taskId) {
+          this.addUserTask(taskId);
+        } else {
+          console.error('Task ID is undefined');
+        }
         this.getAllTasks();
       },
     });
@@ -122,7 +134,7 @@ export class NoteBoardComponent implements OnInit {
     const selectedUsers = this.userList.value;
 
     if (selectedUsers && selectedUsers.length > 0) {
-      const selectedUserIds = selectedUsers.map((user) => user.id);
+      const selectedUserIds = selectedUsers.map((user) => user['userId']);
 
       this.api.deleteUsersFromTask(taskId).subscribe({
         next: () => {
@@ -144,17 +156,18 @@ export class NoteBoardComponent implements OnInit {
   }
 
   editTask(task: ITask) {
-    if (task && task.id) {
+    if (task && task['taskId']) {
       this.status = task.status;
-      this.taskId = task.id;
+      this.taskId = task['taskId'];
       this.todoForm.controls['task'].setValue(task.title);
       this.todoForm.controls['date'].setValue(task.dueDate);
       this.todoForm.controls['description'].setValue(task.description);
+      this.todoForm.controls['priority'].setValue(task.priority);
       this.isEditEnabled = true;
 
-      this.api.getAssignedUsersForTask(task.id).subscribe((users) => {
+      this.api.getAssignedUsersForTask(task['taskId']).subscribe((users) => {
         this.usersAssignedToTask = users;
-        const selectedUsers = users.map(user => this.users.find(u => u.id === user.id)!);
+        const selectedUsers = users.map(user => this.users.find(u => u['userId'] === user['userId'])!);
         this.userList.setValue(selectedUsers);
       });
     } else {
@@ -166,11 +179,12 @@ export class NoteBoardComponent implements OnInit {
     const status = this.status || 'To Do';
 
     const updatedTask: ITask = {
-      id: this.taskId,
+      taskId: this.taskId,
       status: status,
       title: this.todoForm.value.task,
       dueDate: this.todoForm.value.date,
       description: this.todoForm.value.description,
+      priority: this.todoForm.value.priority,
       done: false,
     };
 
@@ -189,10 +203,14 @@ export class NoteBoardComponent implements OnInit {
   }
 
   deleteTask(task: ITask) {
-    if (task.id) {
-      this.api.deleteTask(task.id).subscribe(
+    console.log(task);
+    console.log(task['taskId']);
+
+
+    if (task['taskId']) {
+      this.api.deleteTask(task['taskId']).subscribe(
         () => {
-          this.tasks = this.tasks.filter((t) => t.id !== task.id);
+          this.tasks = this.tasks.filter((t) => t.taskId !== task['taskId']);
         },
         (error) => {
           console.error('Error deleting task:', error);
@@ -204,10 +222,10 @@ export class NoteBoardComponent implements OnInit {
   }
 
   deleteTaskInProgress(task: ITask) {
-    if (task.id) {
-      this.api.deleteTask(task.id).subscribe(
+    if (task['taskId']) {
+      this.api.deleteTask(task['taskId']).subscribe(
         () => {
-          this.inProgress = this.inProgress.filter((t) => t.id !== task.id);
+          this.inProgress = this.inProgress.filter((t) => t.taskId !== task['taskId']);
         },
         (error) => {
           console.error('Error deleting task in progress:', error);
@@ -219,10 +237,10 @@ export class NoteBoardComponent implements OnInit {
   }
 
   deleteTaskDone(task: ITask) {
-    if (task.id) {
-      this.api.deleteTask(task.id).subscribe(
+    if (task['taskId']) {
+      this.api.deleteTask(task['taskId']).subscribe(
         () => {
-          this.done = this.done.filter((t) => t.id !== task.id);
+          this.done = this.done.filter((t) => t.taskId !== task['taskId']);
         },
         (error) => {
           console.error('Error deleting task done:', error);
@@ -230,6 +248,21 @@ export class NoteBoardComponent implements OnInit {
       );
     } else {
       console.error('Task ID is undefined');
+    }
+  }
+
+  getBackgroundColor(priority: string): string {
+    switch (priority) {
+      case 'Low':
+        return '#238240';
+      case 'Medium':
+        return '#fce803';
+      case 'High':
+        return '#B3180C';
+      case 'Stuck':
+        return 'repeating-linear-gradient(45deg, #FFFF00, #FFFF00 10px, #000000 10px, #000000 20px)';
+      default:
+        return '#000';
     }
   }
 

@@ -10,7 +10,8 @@ import { Token } from '@angular/compiler';
 })
 export class AuthService {
 
-  private baseUrl: string = "https://localhost:7174/api/User/";
+  // private baseUrl: string = "https://localhost:7174/api/User/";
+  private baseUrl: string = 'https://taskeep.azurewebsites.net/api/User';
   private userPayload:any;
 
   constructor(private http: HttpClient, private router: Router) {

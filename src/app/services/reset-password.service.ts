@@ -6,7 +6,8 @@ import { ResetPassword } from '../models/reset-password.model';
   providedIn: 'root',
 })
 export class ResetPasswordService {
-  private baseUrl: string = 'https://localhost:7174/api/User';
+  // private baseUrl: string = 'https://localhost:7174/api/User';
+  private baseUrl: string = 'https:taskeep.azurewebsites.net/api/User';
 
   constructor(private http: HttpClient) {}
 
