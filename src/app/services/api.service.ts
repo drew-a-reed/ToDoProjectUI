@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 })
 export class ApiService {
   // private baseUrl: string = 'https://localhost:7174/api/';
-  private baseUrl: string = 'https://taskeep.azurewebsites.net/api/';
+  private baseUrl: string = 'https://taskeeperapi.azurewebsites.net/api/';
 
   constructor(private http: HttpClient) {}
 
