@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -21,22 +21,20 @@ jobs:
         with:
           node-version: '20.x'
 
-      - name: npm install, build
+      - name: npm install, build, and test
         run: |
           npm install
           npm run build --if-present
-      
+          npm run test --if-present
+
+      - name: Zip artifact for deployment
+        run: zip release.zip ./* -r
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: |
-            dist/**
-            package.json
-            package-lock.json
-            index.html
-            favicon.ico
-            assets/
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -52,17 +50,20 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
+
+      - name: Unzip artifact for deployment
+        run: unzip release.zip
       
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_12BA3E6C9D9A4B62821A75E89E5EAF7B }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_9907E5EA4B9546EA838CB699D697E998 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_E3598EB7DA7842AD8B65CF8281B472CE }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_CD4A7B6EAE924C05AFA454345A3EE145 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_A05A5C3EEC584275BC9FDF923C24B40D }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_E751E9B0CEA246FDBD619CC6C301E846 }}
 
       - name: 'Deploy to Azure Web App'
-        uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
         with:
           app-name: 'TasKeeperUI'
           slot-name: 'Production'
