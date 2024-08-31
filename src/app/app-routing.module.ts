@@ -5,6 +5,8 @@ import { SignupComponent } from './components/signup/signup.component';
 import { AuthGuard } from './guards/auth.guard';
 import { ResetComponent } from './components/reset/reset.component';
 import { NoteBoardComponent } from './components/noteboard/noteboard.component';
+import { TaskboardPickerComponent } from './components/taskboard-picker/taskboard-picker.component';
+import { TaskboardCreatorComponent } from './components/taskboard-creator/taskboard-creator.component';
 
 const routes: Routes = [
   {
@@ -22,6 +24,16 @@ const routes: Routes = [
   {
     path: 'noteboard',
     component: NoteBoardComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'taskboard-picker',
+    component: TaskboardPickerComponent,
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'taskboard-creator',
+    component: TaskboardCreatorComponent,
     canActivate: [AuthGuard]
   },
   {

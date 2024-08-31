@@ -7,8 +7,8 @@ import { Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
-export class ApiService {
-  // private baseUrl: string = 'https://localhost:7174/api/';
+export class UserService {
+  private baseUrlDev: string = 'https://localhost:7174/api/';
   private baseUrl: string = 'https://taskeeperapi.azurewebsites.net/api/';
 
   constructor(private http: HttpClient) {}
@@ -21,21 +21,7 @@ export class ApiService {
     return this.http.get<IUser>(`${this.baseUrl}User/${userId}`);
   }
 
-  getAllTasks() {
-    return this.http.get<ITask[]>(`${this.baseUrl}Task`);
-  }
 
-  addTask(task: ITask) {
-    return this.http.post<ITask>(`${this.baseUrl}Task`, task);
-  }
-
-  updateTask(task: ITask) {
-    return this.http.put<any>(`${this.baseUrl}Task/${task.taskId}`, task);
-  }
-
-  deleteTask(taskId: string) {
-    return this.http.delete<ITask>(`${this.baseUrl}Task/${taskId}`);
-  }
 
   addUserTasks(userIds: string[], taskId: string) {
     const userTasks = userIds.map((userId) => {

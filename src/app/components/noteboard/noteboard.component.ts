@@ -13,9 +13,11 @@ import {
 import { Observable, map, startWith } from 'rxjs';
 import { ITask } from 'src/app/models/task';
 import { IUser } from 'src/app/models/user';
-import { ApiService } from 'src/app/services/api.service';
+import { UserService } from 'src/app/services/user.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { UserStoreService } from 'src/app/services/user-store.service';
+import { TaskService } from 'src/app/services/task.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-noteboard',
@@ -41,12 +43,15 @@ export class NoteBoardComponent implements OnInit {
   taskUserMap: { [taskId: string]: IUser[] } = {};
   priorities: string[] = ['Low', 'Medium', 'High', 'Stuck'];
   priorityList = new FormControl<ITask[]>([]);
+  taskboardId: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
-    private api: ApiService,
-    private userStore: UserStoreService
+    private userService: UserService,
+    private userStore: UserStoreService,
+    private taskService: TaskService,
+    private activatedRoute: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
@@ -57,11 +62,17 @@ export class NoteBoardComponent implements OnInit {
       priority: ['', Validators.required]
     });
 
-    this.api.getAllUsers().subscribe((response) => {
+    this.activatedRoute.queryParams.subscribe(val => {
+      this.taskboardId = val['taskboardId'];
+    })
+
+    this.userService.getAllUsers().subscribe((response) => {
       this.users = response;
     });
 
-    this.getAllTasks();
+    if(this.taskboardId){
+      this.getAllTasks(this.taskboardId);
+    }
 
     this.userStore.getFullNameFromStore().subscribe((val) => {
       const fullNameFromToken = this.auth.getFullNameFromToken();
@@ -74,9 +85,12 @@ export class NoteBoardComponent implements OnInit {
     });
   }
 
-  getAllTasks() {
-    this.api.getAllTasks().subscribe((response) => {
+  getAllTasks(taskboardId: string) {
+    console.log(taskboardId);
+
+    this.taskService.getAllTasks(taskboardId).subscribe((response) => {
       this.tasks = response;
+console.log(this.tasks);
 
       this.inProgress = this.tasks.filter(
         (task) => task.status.toLowerCase() === 'in progress'
@@ -90,7 +104,7 @@ export class NoteBoardComponent implements OnInit {
 
       [...this.tasks, ...this.inProgress, ...this.done].forEach((task) => {
         if (task['taskId'] !== undefined) {
-          this.api.getAssignedUsersForTask(task['taskId']).subscribe((users) => {
+          this.userService.getAssignedUsersForTask(task['taskId']).subscribe((users) => {
             if (task['taskId'] !== undefined) {
               this.taskUserMap[task['taskId']] = users;
             }
@@ -114,7 +128,7 @@ export class NoteBoardComponent implements OnInit {
 
     console.log(newTask);
 
-    this.api.addTask(newTask).subscribe({
+    this.taskService.addTask(newTask).subscribe({
 
       next: (response) => {
         const taskId = response['taskId'];
@@ -123,7 +137,9 @@ export class NoteBoardComponent implements OnInit {
         } else {
           console.error('Task ID is undefined');
         }
-        this.getAllTasks();
+        if (this.taskboardId) {
+          this.getAllTasks(this.taskboardId);
+        }
       },
     });
 
@@ -136,11 +152,13 @@ export class NoteBoardComponent implements OnInit {
     if (selectedUsers && selectedUsers.length > 0) {
       const selectedUserIds = selectedUsers.map((user) => user['userId']);
 
-      this.api.deleteUsersFromTask(taskId).subscribe({
+      this.userService.deleteUsersFromTask(taskId).subscribe({
         next: () => {
-          this.api.addUserTasks(selectedUserIds, taskId).subscribe({
+          this.userService.addUserTasks(selectedUserIds, taskId).subscribe({
             next: (response) => {
-              this.getAllTasks();
+              if (this.taskboardId) {
+                this.getAllTasks(this.taskboardId);
+              }
             },
             error: (error) => {
               console.error('Error adding user tasks:', error);
@@ -165,7 +183,7 @@ export class NoteBoardComponent implements OnInit {
       this.todoForm.controls['priority'].setValue(task.priority);
       this.isEditEnabled = true;
 
-      this.api.getAssignedUsersForTask(task['taskId']).subscribe((users) => {
+      this.userService.getAssignedUsersForTask(task['taskId']).subscribe((users) => {
         this.usersAssignedToTask = users;
         const selectedUsers = users.map(user => this.users.find(u => u['userId'] === user['userId'])!);
         this.userList.setValue(selectedUsers);
@@ -188,13 +206,15 @@ export class NoteBoardComponent implements OnInit {
       done: false,
     };
 
-    this.api.updateTask(updatedTask).subscribe({
+    this.taskService.updateTask(updatedTask).subscribe({
       next: (response) => {
         const taskId = response['taskId'];
         this.addUserTask(taskId);
         this.todoForm.reset();
         this.isEditEnabled = false;
-        this.getAllTasks();
+        if (this.taskboardId) {
+          this.getAllTasks(this.taskboardId);
+        }
       },
       error: (error) => {
         console.error(error);
@@ -208,7 +228,7 @@ export class NoteBoardComponent implements OnInit {
 
 
     if (task['taskId']) {
-      this.api.deleteTask(task['taskId']).subscribe(
+      this.taskService.deleteTask(task['taskId']).subscribe(
         () => {
           this.tasks = this.tasks.filter((t) => t.taskId !== task['taskId']);
         },
@@ -223,7 +243,7 @@ export class NoteBoardComponent implements OnInit {
 
   deleteTaskInProgress(task: ITask) {
     if (task['taskId']) {
-      this.api.deleteTask(task['taskId']).subscribe(
+      this.taskService.deleteTask(task['taskId']).subscribe(
         () => {
           this.inProgress = this.inProgress.filter((t) => t.taskId !== task['taskId']);
         },
@@ -238,7 +258,7 @@ export class NoteBoardComponent implements OnInit {
 
   deleteTaskDone(task: ITask) {
     if (task['taskId']) {
-      this.api.deleteTask(task['taskId']).subscribe(
+      this.taskService.deleteTask(task['taskId']).subscribe(
         () => {
           this.done = this.done.filter((t) => t.taskId !== task['taskId']);
         },
@@ -304,9 +324,11 @@ export class NoteBoardComponent implements OnInit {
         event.currentIndex
       );
 
-      this.api.updateTask(movedTask).subscribe({
+      this.taskService.updateTask(movedTask).subscribe({
         next: (response) => {
-          this.getAllTasks();
+          if (this.taskboardId) {
+            this.getAllTasks(this.taskboardId);
+          }
         },
         error: (error) => {
           console.error(error);

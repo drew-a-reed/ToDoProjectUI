@@ -1,0 +1,49 @@
+<div class="outer">
+  <div class="container">
+    <div class="row">
+      <div class="offset-md-2 col-lg-5 col-md-7 offset-lg-4 offset-md-3">
+        <div class="panel border bg-white">
+          <div class="panel-heading">
+            <h3 class="pt-3 font-weight-bold">Create Your Taskboard</h3>
+          </div>
+          <div class="panel-body p-3">
+            <form [formGroup]="createTaskboardForm">
+              <div class="form-group pt-3">
+                <div class="input-field" [class.error]="
+                    createTaskboardForm.controls['taskboardName'].dirty &&
+                    createTaskboardForm.hasError('required', 'taskboardName')
+                  ">
+                  <span class="fa fa-user p-2"></span>
+                  <input formControlName="taskboardName" type="text" placeholder="Taskboard Name" />
+                </div>
+              </div>
+              <small *ngIf="
+                  createTaskboardForm.controls['taskboardName'].dirty &&
+                  createTaskboardForm.hasError('required', 'taskboardName')
+                " class="text-danger">*Taskboard Name is required</small>
+              <div class="form-group pt-3">
+                <div class="input-field"
+                  [class.error]="createTaskboardForm.controls['taskboardPassword'].dirty && createTaskboardForm.hasError('required','taskboardPassword')">
+                  <span class="fa fa-lock px-2"></span> <input formControlName="taskboardPassword" [type]="type"
+                    placeholder="Taskboard Password"> <button type="button" (click)="hideShowPassword()"
+                    class="bg-white text-muted" style="border:none;"> <span class="fa {{eyeIcon}}"></span> </button>
+                </div>
+              </div>
+              <small *ngIf="
+                  createTaskboardForm.controls['taskboardPassword'].dirty &&
+                  createTaskboardForm.hasError('required', 'taskboardPassword')
+                " class="text-danger">*Taskboard name is required</small>
+              <button (click)="onSignup()" type="submit" class="btn btn-primary btn-block mt-4 w-100">
+                Create Taskboard
+              </button>
+              <div class="text-center pt-4 text-muted">
+                Already have a taskboard?
+                <a id="forget" routerLink="/taskboard-picker">Sign into your taskboard here.</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
