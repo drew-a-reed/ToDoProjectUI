@@ -39,7 +39,7 @@ export class NoteBoardComponent implements OnInit {
   fullName: string = '';
   userList = new FormControl<IUser[]>([]);
   user: IUser | undefined;
-  usersAssignedToTask:  IUser[] = [];
+  usersAssignedToTask: IUser[] = [];
   taskUserMap: { [taskId: string]: IUser[] } = {};
   priorities: string[] = ['Low', 'Medium', 'High', 'Stuck'];
   priorityList = new FormControl<ITask[]>([]);
@@ -51,7 +51,7 @@ export class NoteBoardComponent implements OnInit {
     private userService: UserService,
     private userStore: UserStoreService,
     private taskService: TaskService,
-    private activatedRoute: ActivatedRoute,
+    private activatedRoute: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -59,18 +59,18 @@ export class NoteBoardComponent implements OnInit {
       task: ['', Validators.required],
       date: ['', Validators.required],
       description: ['', Validators.required],
-      priority: ['', Validators.required]
+      priority: ['', Validators.required],
     });
 
-    this.activatedRoute.queryParams.subscribe(val => {
+    this.activatedRoute.queryParams.subscribe((val) => {
       this.taskboardId = val['taskboardId'];
-    })
+    });
 
     this.userService.getAllUsers().subscribe((response) => {
       this.users = response;
     });
 
-    if(this.taskboardId){
+    if (this.taskboardId) {
       this.getAllTasks(this.taskboardId);
     }
 
@@ -86,11 +86,9 @@ export class NoteBoardComponent implements OnInit {
   }
 
   getAllTasks(taskboardId: string) {
-    console.log(taskboardId);
 
     this.taskService.getAllTasks(taskboardId).subscribe((response) => {
       this.tasks = response;
-console.log(this.tasks);
 
       this.inProgress = this.tasks.filter(
         (task) => task.status.toLowerCase() === 'in progress'
@@ -104,18 +102,19 @@ console.log(this.tasks);
 
       [...this.tasks, ...this.inProgress, ...this.done].forEach((task) => {
         if (task['taskId'] !== undefined) {
-          this.userService.getAssignedUsersForTask(task['taskId']).subscribe((users) => {
-            if (task['taskId'] !== undefined) {
-              this.taskUserMap[task['taskId']] = users;
-            }
-          });
+          this.userService
+            .getAssignedUsersForTask(task['taskId'])
+            .subscribe((users) => {
+              if (task['taskId'] !== undefined) {
+                this.taskUserMap[task['taskId']] = users;
+              }
+            });
         }
       });
     });
   }
 
   addTask() {
-
     const newTask: ITask = {
       status: 'To Do',
       title: this.todoForm.value.task,
@@ -124,12 +123,10 @@ console.log(this.tasks);
       description: this.todoForm.value.description,
       priority: this.todoForm.value.priority,
       done: false,
+      taskboardId: this.taskboardId
     };
 
-    console.log(newTask);
-
     this.taskService.addTask(newTask).subscribe({
-
       next: (response) => {
         const taskId = response['taskId'];
         if (taskId) {
@@ -183,11 +180,15 @@ console.log(this.tasks);
       this.todoForm.controls['priority'].setValue(task.priority);
       this.isEditEnabled = true;
 
-      this.userService.getAssignedUsersForTask(task['taskId']).subscribe((users) => {
-        this.usersAssignedToTask = users;
-        const selectedUsers = users.map(user => this.users.find(u => u['userId'] === user['userId'])!);
-        this.userList.setValue(selectedUsers);
-      });
+      this.userService
+        .getAssignedUsersForTask(task['taskId'])
+        .subscribe((users) => {
+          this.usersAssignedToTask = users;
+          const selectedUsers = users.map(
+            (user) => this.users.find((u) => u['userId'] === user['userId'])!
+          );
+          this.userList.setValue(selectedUsers);
+        });
     } else {
       console.error('Task ID is undefined');
     }
@@ -223,9 +224,6 @@ console.log(this.tasks);
   }
 
   deleteTask(task: ITask) {
-    console.log(task);
-    console.log(task['taskId']);
-
 
     if (task['taskId']) {
       this.taskService.deleteTask(task['taskId']).subscribe(
@@ -245,7 +243,9 @@ console.log(this.tasks);
     if (task['taskId']) {
       this.taskService.deleteTask(task['taskId']).subscribe(
         () => {
-          this.inProgress = this.inProgress.filter((t) => t.taskId !== task['taskId']);
+          this.inProgress = this.inProgress.filter(
+            (t) => t.taskId !== task['taskId']
+          );
         },
         (error) => {
           console.error('Error deleting task in progress:', error);
