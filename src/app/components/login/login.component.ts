@@ -70,9 +70,11 @@ export class LoginComponent implements OnInit {
           this.loginForm.reset();
           this.auth.storeToken(response.accessToken);
           this.auth.storeRefreshToken(response.refreshToken);
+          this.auth.storeUserId(response.userId);
           const tokenPayload = this.auth.decodeToken();
           this.userStore.setFullNameForStore(tokenPayload.unique_name);
           this.userStore.setRoleForStore(tokenPayload.role);
+
           this.router.navigate(['taskboard-picker']);
         },
         error: (response) => {

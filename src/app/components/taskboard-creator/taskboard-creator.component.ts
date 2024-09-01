@@ -19,6 +19,7 @@ export class TaskboardCreatorComponent {
   showModal: boolean = false;
   error: string = 'Login failed. Please check your credentials.';
   passwordState: string = 'Show';
+  userId: string | null = null;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -28,6 +29,9 @@ export class TaskboardCreatorComponent {
   ) {}
 
   ngOnInit(): void {
+
+    this.userId = this.auth.getUserId();
+
     this.createTaskboardForm = this.formBuilder.group({
       taskboardName: ['', Validators.required],
       taskboardPassword: ['', Validators.required],
@@ -41,12 +45,14 @@ export class TaskboardCreatorComponent {
     this.isText ? (this.passwordState = 'Hide') : (this.passwordState = 'Show');
   }
 
-  onSignup() {
+  onCreate() {
     if (this.createTaskboardForm.valid) {
-      this.taskboardService.signUp(this.createTaskboardForm.value).subscribe({
+      this.taskboardService.createTaskboard(this.createTaskboardForm.value).subscribe({
         next: (response) => {
           this.createTaskboardForm.reset();
-          this.router.navigate(['taskboard-picker']);
+          console.log("look here", response);
+//TODO call addusertotaskboard(response.taskid...userid)
+          // this.router.navigate(['taskboard-picker']);
         },
         error: (response) => {
           this.error = response.error.message;

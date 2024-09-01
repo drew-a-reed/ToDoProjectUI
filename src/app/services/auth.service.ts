@@ -19,11 +19,11 @@ export class AuthService {
    }
 
   signUp(userObj:any){
-    return this.http.post<any>(`${this.baseUrl}register`, userObj);
+    return this.http.post<any>(`${this.baseUrlDev}register`, userObj);
   }
 
   login(loginObj:any){
-    return this.http.post<any>(`${this.baseUrl}authenticate`, loginObj);
+    return this.http.post<any>(`${this.baseUrlDev}authenticate`, loginObj);
   }
 
   storeToken(tokenValue: string){
@@ -34,12 +34,20 @@ export class AuthService {
     localStorage.setItem('refreshToken', tokenValue);
   }
 
+  storeUserId(tokenValue: string){
+    localStorage.setItem('userId', tokenValue);
+  }
+
   getToken(){
     return localStorage.getItem('token');
   }
 
   getRefreshToken(){
     return localStorage.getItem('refreshToken');
+  }
+
+  getUserId(){
+    return localStorage.getItem('userId');
   }
 
   isLoggedIn(): boolean {

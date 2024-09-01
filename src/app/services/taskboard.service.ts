@@ -6,22 +6,22 @@ import { ITaskboard } from '../models/taskboard';
   providedIn: 'root',
 })
 export class TaskboardService {
-  private baseUrlDev: string = 'https://localhost:7174/api/';
+  private baseUrlDev: string = 'https://localhost:7174/api/taskboard/';
   private baseUrl: string =
     'https://taskeeperapi.azurewebsites.net/api/taskboard/';
 
   constructor(private http: HttpClient) {}
 
-  signUp(taskboardObj: any) {
-    return this.http.post<any>(`${this.baseUrl}register`, taskboardObj);
+  createTaskboard(taskboardObj: any) {
+    return this.http.post<any>(`${this.baseUrlDev}register`, taskboardObj);
   }
 
   login(taskboardObj: any) {
-    return this.http.post<any>(`${this.baseUrl}authenticate`, taskboardObj);
+    return this.http.post<any>(`${this.baseUrlDev}authenticate`, taskboardObj);
   }
 
-  addUserToTaskboard(taskboardId: string, userId: string) {
-    const body = { taskboardId, userId };
+  addUserToTaskboard(taskboardId: string, userId: string, role: string) {
+    const body = { taskboardId, userId, role };
     return this.http.post<any>('https://taskeeperapi.azurewebsites.net/api/usertaskboard/', body);
   }
 
