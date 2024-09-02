@@ -12,12 +12,12 @@ export class ResetPasswordService {
   constructor(private http: HttpClient) {}
 
   sendResetPasswordLink(email: string) {
-    return this.http.post<any>(`${this.baseUrlDev}/send-reset-email/${email}`, {});
+    return this.http.post<any>(`${this.baseUrl}/send-reset-email/${email}`, {});
   }
 
   resetPassword(resetPasswordObj: ResetPassword) {
     return this.http.post<any>(
-      `${this.baseUrlDev}/reset-password`,
+      `${this.baseUrl}/reset-password`,
       resetPasswordObj
     );
   }

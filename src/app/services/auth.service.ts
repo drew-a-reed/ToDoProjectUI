@@ -19,11 +19,11 @@ export class AuthService {
    }
 
   signUp(userObj:any){
-    return this.http.post<any>(`${this.baseUrlDev}register`, userObj);
+    return this.http.post<any>(`${this.baseUrl}register`, userObj);
   }
 
   login(loginObj:any){
-    return this.http.post<any>(`${this.baseUrlDev}authenticate`, loginObj);
+    return this.http.post<any>(`${this.baseUrl}authenticate`, loginObj);
   }
 
   storeToken(tokenValue: string){

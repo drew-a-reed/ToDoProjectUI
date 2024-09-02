@@ -73,7 +73,6 @@
         </div>
       </div>
     </div>
-
     <div class="tasks--board-category">
       <h2>In Progress <span *ngIf="inProgress.length > 0"> - {{ inProgress.length }}</span></h2>
       <div cdkDropList [cdkDropListData]="inProgress" class="tasks--board-category-list in-progress"
@@ -105,8 +104,6 @@
         </div>
       </div>
     </div>
-
-
     <div class="tasks--board-category">
       <h2>Done <span *ngIf="done.length > 0"> - {{ done.length }}</span></h2>
       <div cdkDropList [cdkDropListData]="done" class="tasks--board-category-list done"
@@ -138,8 +135,5 @@
         </div>
       </div>
     </div>
-
-
-
   </div>
 </div>

@@ -13,11 +13,11 @@ export class TaskboardService {
   constructor(private http: HttpClient) {}
 
   createTaskboard(taskboardObj: any) {
-    return this.http.post<any>(`${this.baseUrlDev}register`, taskboardObj);
+    return this.http.post<any>(`${this.baseUrl}register`, taskboardObj);
   }
 
   loginTaskboard(taskboardObj: any) {
-    return this.http.post<any>(`${this.baseUrlDev}authenticate`, taskboardObj);
+    return this.http.post<any>(`${this.baseUrl}authenticate`, taskboardObj);
   }
 
 
