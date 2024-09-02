@@ -16,13 +16,9 @@ export class TaskboardService {
     return this.http.post<any>(`${this.baseUrlDev}register`, taskboardObj);
   }
 
-  login(taskboardObj: any) {
+  loginTaskboard(taskboardObj: any) {
     return this.http.post<any>(`${this.baseUrlDev}authenticate`, taskboardObj);
   }
 
-  addUserToTaskboard(taskboardId: string, userId: string, role: string) {
-    const body = { taskboardId, userId, role };
-    return this.http.post<any>('https://taskeeperapi.azurewebsites.net/api/usertaskboard/', body);
-  }
 
 }

@@ -1,10 +1,11 @@
 declare var google: any;
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import ValidateForm from 'src/app/helpers/validateform';
 import { AuthService } from 'src/app/services/auth.service';
 import { TaskboardService } from 'src/app/services/taskboard.service';
+import { IUserTaskboard } from 'src/app/models/user-taskboard.model';
+import { UserTaskboardService } from 'src/app/services/user-taskboard.service';
 
 @Component({
   selector: 'app-taskboard-creator',
@@ -20,12 +21,15 @@ export class TaskboardCreatorComponent {
   error: string = 'Login failed. Please check your credentials.';
   passwordState: string = 'Show';
   userId: string | null = null;
+  taskboardId: string | null = null;
+  userTaskboard!: IUserTaskboard;
+  router: any;
 
   constructor(
     private formBuilder: FormBuilder,
     private auth: AuthService,
-    private router: Router,
-    private taskboardService: TaskboardService
+    private taskboardService: TaskboardService,
+    private UserTaskboardService: UserTaskboardService
   ) {}
 
   ngOnInit(): void {
@@ -49,10 +53,23 @@ export class TaskboardCreatorComponent {
     if (this.createTaskboardForm.valid) {
       this.taskboardService.createTaskboard(this.createTaskboardForm.value).subscribe({
         next: (response) => {
+          this.taskboardId = response.taskboardId;
+          this.userTaskboard = this.userTaskboard || {};
+
+          if (this.taskboardId && this.userId) {
+            this.userTaskboard.taskboardId = this.taskboardId;
+            this.userTaskboard.userId = this.userId
+            this.userTaskboard.role = "Owner";
+          }
+          this.UserTaskboardService.addUserToTaskboard(this.userTaskboard).subscribe({
+            next: (response) => {
+              console.log(response);
+            }
+          });
+
           this.createTaskboardForm.reset();
-          console.log("look here", response);
-//TODO call addusertotaskboard(response.taskid...userid)
-          // this.router.navigate(['taskboard-picker']);
+
+          this.router.navigate(['taskboard-picker']);
         },
         error: (response) => {
           this.error = response.error.message;

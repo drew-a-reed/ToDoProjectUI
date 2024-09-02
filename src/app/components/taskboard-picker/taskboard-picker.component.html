@@ -9,20 +9,34 @@
           <div class="panel-body p-3">
             <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
               <div class="form-group pt-3">
-                <div class="input-field"
+                <div
                   [class.error]="loginForm.controls['taskboardName'].dirty && loginForm.hasError('required','taskboardName')">
-                  <span class="fa fa-user p-2"></span> <input formControlName="taskboardName" type="text"
-                    placeholder="Taskboard Name" required>
+                  <mat-form-field appearance="outline" class="taskboard-picker">
+                    <mat-label>Choose Taskboard</mat-label>
+                    <input type="text"
+                      placeholder="Enter Taskboard Name"
+                      matInput
+                      formControlName="taskboardName"
+                      [matAutocomplete]="auto">
+                    <mat-autocomplete #auto="matAutocomplete">
+                      <mat-option *ngFor="let taskboard of filteredTaskboards | async" [value]="taskboard.taskboardName">
+                        {{ taskboard.taskboardName }}
+                      </mat-option>
+                    </mat-autocomplete>
+                  </mat-form-field>
                 </div>
               </div>
               <small *ngIf="loginForm.controls['taskboardName'].dirty && loginForm.hasError('required','taskboardName')"
                 class="text-danger">*Taskboard Name is required*</small>
-              <div class="form-group pt-3">
+              <div class="form-group pt-3" style="font-size: 1.25rem;">
                 <div class="input-field"
                   [class.error]="loginForm.controls['taskboardPassword'].dirty && loginForm.hasError('required','taskboardPassword')">
-                  <span class="fa fa-lock px-2"></span> <input formControlName="taskboardPassword" [type]="type"
-                    placeholder="Taskboard Password"> <button type="button" (click)="hideShowPassword()"
-                    class="bg-white text-muted" style="border:none;"> <span class="fa {{eyeIcon}}"></span> </button>
+                  <span class="fa fa-lock px-2"></span>
+                  <input formControlName="taskboardPassword" [type]="type" placeholder="Taskboard Password">
+                  <button type="button" (click)="hideShowPassword()"
+                    class="bg-white text-muted" style="border:none;">
+                    <span class="fa {{eyeIcon}}"></span>
+                  </button>
                 </div>
               </div>
               <small

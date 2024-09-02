@@ -21,8 +21,6 @@ export class UserService {
     return this.http.get<IUser>(`${this.baseUrlDev}User/${userId}`);
   }
 
-
-
   addUserTasks(userIds: string[], taskId: string) {
     const userTasks = userIds.map((userId) => {
       return { userId, taskId: taskId };
