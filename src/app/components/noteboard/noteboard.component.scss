@@ -85,7 +85,8 @@
 
           &-description {
             padding: 0 1rem;
-            font-size: clamp(1rem, 1.5vw, 1.75rem);
+            font-size: clamp(0.75rem, 1.25vw, 1.5rem);
+            line-height: 1.2;
           }
 
           &-date {
