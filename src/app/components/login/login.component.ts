@@ -38,8 +38,8 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     this.loginForm = this.formBuilder.group({
-      email: ['', Validators.required],
-      password: ['', Validators.required],
+      email: ['demo@email.com', Validators.required],
+      password: ['Password123!', Validators.required],
     });
     google.accounts.id.initialize({
       client_id:
