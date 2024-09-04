@@ -49,8 +49,8 @@ export class TaskboardPickerComponent {
     this.userId = this.auth.getUserId();
 
     this.loginForm = this.formBuilder.group({
-      taskboardName: ['', Validators.required],
-      taskboardPassword: ['', Validators.required],
+      taskboardName: ['Demo Taskboard', Validators.required],
+      taskboardPassword: ['Password123!', Validators.required],
     });
 
     if (this.userId){
